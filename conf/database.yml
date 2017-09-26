@@ -1,0 +1,7 @@
+# PostgreSQL configuration
+production:
+  adapter: postgresql
+  database: __DB_NAME__
+  host: 127.0.0.1
+  username: __DB_NAME__
+  password: "__DB_PWD__"

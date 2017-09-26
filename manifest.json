@@ -1,0 +1,40 @@
+{
+    "name": "YunoHost example app",
+    "id": "redmine",
+    "packaging_format": 1,
+    "description": {
+        "en": "Example package for YunoHost application.",
+        "fr": "Exemple de package d’application pour YunoHost."
+    },
+    "version": "3.3.0",
+    "url": "https://example.com",
+    "license": "free",
+    "maintainer": {
+        "name": "John doe",
+        "email": "john.doe@example.com",
+        "url": "http://example.com"
+    },
+    "requirements": {
+        "yunohost": ">= 2.7.2"
+    },
+    "multi_instance": false,
+    "services": [
+        "nginx",
+        "php5-fpm",
+        "mysql"
+    ],
+    "arguments": {
+        "install" : [
+            {
+                "name": "domain",
+                "type": "domain",
+                "ask": {
+                    "en": "Choose a domain name for ynhexample",
+                    "fr": "Choisissez un nom de domaine pour ynhexample"
+                },
+                "example": "example.com",
+                "default": "sous.crudelis-test5.fr"
+            }
+        ]
+    }
+}

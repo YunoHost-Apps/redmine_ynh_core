@@ -1,0 +1,32 @@
+http://www.redmine.org/projects/redmine/wiki/HowTo_Install_Redmine_on_Debian_9
+http://www.redmine.org/projects/redmine/wiki/HowTo_Install_Redmine_on_Debian_8_with_Apache2-Passenger
+http://www.redmine.org/projects/redmine/wiki/HowTo_configure_Nginx_to_run_Redmine
+http://www.untrustedconnection.com/2016/05/nginx-https-with-lets-encrypt-and.html
+
+/media/data/YNH_tartare_dump/tartare/var/www/redmine
+
+
+apt-get install ruby-zip libssl-dev libyaml-dev libcurl4-openssl-dev ruby gem libapr1-dev libxslt1-dev checkinstall libxml2-dev ruby-dev vim libmagickwand-dev imagemagick
+
+bdd
+redmine:hldh8GeNS3Yh1UQT
+
+Install dans /opt
+http://www.redmine.org/releases/redmine-3.3.0.tar.gz
+
+Config database
+config/database.yml
+
+C'était du postgre sur tartare...
+	On est bon pour monter l'app directe...
+
+
+
+
+
+
+
+
+
+
+sudo yunohost app install --verbose redmine_ynh_core/
