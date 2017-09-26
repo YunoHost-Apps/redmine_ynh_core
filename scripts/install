@@ -50,7 +50,7 @@ ynh_app_setting_set $app path $path_url
 # INSTALL DEPENDENCIES
 #=================================================
 
-ynh_install_app_dependencies ruby-zip libssl-dev libyaml-dev libcurl4-openssl-dev ruby gem libapr1-dev libxslt1-dev checkinstall libxml2-dev ruby-dev vim libmagickwand-dev imagemagick postgresql
+ynh_install_app_dependencies ruby-zip libssl-dev libyaml-dev libcurl4-openssl-dev ruby gem libapr1-dev libxslt1-dev checkinstall libxml2-dev ruby-dev vim libmagickwand-dev imagemagick postgresql postgresql-server-dev-all
 
 #=================================================
 # CREATE A POSTGRES DATABASE
@@ -83,7 +83,7 @@ ynh_add_nginx_config
 #=================================================
 
 # Create a system user
-ynh_system_user_create $app
+ynh_system_user_create $app "$final_path"
 
 #=================================================
 # SPECIFIC SETUP
@@ -99,38 +99,45 @@ ynh_replace_string "__DB_PWD__" "$db_pwd" "$final_path/config/database.yml"
 # SETUP PUMA, A RUBY SERVER
 #=================================================
 
-ruby --version >&2
-
-# https://www.rosehosting.com/blog/install-redmine-on-an-ubuntu-14-04-server-with-mariadb-puma-and-nginx/
-
 # Copy the configuration for puma
 cp -a ../conf/puma.rb "$final_path/config/puma.rb"
 ynh_replace_string "__FINALPATH__" "$final_path" "$final_path/config/puma.rb"
+ynh_replace_string "__APP__" "$app" "$final_path/config/puma.rb"
+
+# Set permissions to app files
+chown -R $app: $final_path
 
 # Install puma with gem
 (cd "$final_path"
+# Install bundler, a gems installer
+# exec_as $app gem install bundler --install-dir "$final_path/vendor"
 gem install bundler
-echo "gem 'puma'" >> Gemfile.local
-echo "gem: --no-ri --no-rdoc" >> ~/.gemrc
-bundle install --without development test postgresql)
+# Add puma to the dependencies
+exec_as $app echo "gem 'puma'" >> Gemfile.local
+# Install without documentation. Why ?
+exec_as $app echo "gem: --no-ri --no-rdoc" >> "$final_path/.gemrc"
+# Install dependencies
+exec_as $app bundle install --path vendor/bundle --without development test postgresql)
 
 #=================================================
 # PREPARE THE DATABASE
 #=================================================
 
-# !!!???
-rake generate_secret_token
-RAILS_ENV=production rake db:migrate
-RAILS_ENV=production REDMINE_LANG=en rake redmine:load_default_data
-# I don't have the slightest idea about what I'm doing here...
-# Just a stupid copy of a random tuto...
+(cd "$final_path"
+rake_exec="exec_as $app bundle --without development exec rake"
+$rake_exec generate_secret_token
+RAILS_ENV=production $rake_exec db:migrate
+RAILS_ENV=production REDMINE_LANG=en $rake_exec redmine:load_default_data)
 
 #=================================================
 # SETUP SYSTEMD
 #=================================================
 
 # Create a dedicated systemd config
-ynh_systemd_config
+# ynh_add_systemd_config
+cp ../conf/sysvinit.init /etc/init.d/redmine
+chmod +x /etc/init.d/redmine
+update-rc.d redmine defaults
 
 #=================================================
 # STORE THE CHECKSUM OF THE CONFIG FILE
@@ -144,6 +151,9 @@ ynh_systemd_config
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
+
+# Add a pids directory for the systemd script.
+mkdir "$final_path/tmp/pids"
 
 # Set permissions to app files
 chown -R $app: $final_path
@@ -171,13 +181,13 @@ yunohost service add redmine --log "/var/log/$app/$app/log"
 ynh_app_setting_set $app unprotected_uris "/"
 
 #=================================================
-# START PUMA AND REDMINE
-#=================================================
-
-systemctl restart $app
-
-#=================================================
 # RELOAD NGINX
 #=================================================
 
 systemctl reload nginx
+
+#=================================================
+# START PUMA AND REDMINE
+#=================================================
+
+systemctl start $app
