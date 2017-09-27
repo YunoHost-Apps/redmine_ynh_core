@@ -124,6 +124,9 @@ update-rc.d $app defaults
 # RESTORE THE LOGROTATE CONFIGURATION
 #=================================================
 
+mkdir -p /var/log/$app
+chown -R $app: /var/log/$app
+
 ynh_restore_file "/etc/logrotate.d/$app"
 
 #=================================================
@@ -139,3 +142,4 @@ systemctl reload nginx
 #=================================================
 
 systemctl start $app
+sleep 2

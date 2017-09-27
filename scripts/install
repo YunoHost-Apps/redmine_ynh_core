@@ -137,6 +137,8 @@ $rake_exec REDMINE_LANG=en redmine:load_default_data)
 # Create a dedicated systemd config
 # ynh_add_systemd_config
 # Doesn't work with systemd... So I tried and success with sysvinit
+ynh_replace_string "__FINALPATH__" "$final_path" "../conf/sysvinit.init"
+ynh_replace_string "__APP__" "$app" "../conf/sysvinit.init"
 cp ../conf/sysvinit.init /etc/init.d/$app
 chmod +x /etc/init.d/$app
 update-rc.d $app defaults
@@ -202,3 +204,4 @@ systemctl reload nginx
 #=================================================
 
 systemctl start $app
+sleep 2

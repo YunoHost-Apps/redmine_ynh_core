@@ -11,9 +11,9 @@
 
 # Do NOT "set -e"
 
-APP_USER=redmine
-APP_NAME=redmine
-APP_ROOT="/opt/redmine"
+APP_USER=__APP__
+APP_NAME=__APP__
+APP_ROOT="__FINALPATH__"
 RAILS_ENV=production
 
 # RBENV_ROOT="/home/$APP_USER/.rbenv"
@@ -25,7 +25,7 @@ DAEMON_ARGS="--config $APP_ROOT/config/puma.rb -e $RAILS_ENV"
 CMD="RAILS_ENV=\"$RAILS_ENV\" $DAEMON $DAEMON_ARGS"
 # CMD="$SET_PATH; RAILS_ENV=\"$RAILS_ENV\" $DAEMON $DAEMON_ARGS"
 # CMD="$DAEMON $DAEMON_ARGS"
-NAME=redmine
+NAME=__APP__
 DESC="Puma Redmine Service"
 PIDFILE="$APP_ROOT/tmp/pids/puma.pid"
 SCRIPTNAME="/etc/init.d/$NAME"

@@ -1,22 +1,15 @@
-# Example app for YunoHost
+# Redmine for YunoHost
 
 - [Yunohost project](https://yunohost.org)
-- [Exemple app website](https://example.com)
+- [Redmine website](https://www.redmine.org/)
 
-Description of the app.
+Redmine is a flexible project management web application. Written using the Ruby on Rails framework, it is cross-platform and cross-database.
 
-## Usage
-- Copy this app before work on it.
-- Edit `conf/nginx.conf` file to match application prerequisites.
-- Edit `manifest.json` with application specific information.
-- Edit the `install`, `upgrade`, `remove`, `backup`, and `restore` scripts.
-- Add a `LICENSE` file for the package.
-- Edit `README.md`.
-
-**More information on the documentation page:**    
-https://yunohost.org/packaging_apps
+**This package is designed to be used for our redmine, https://dev.yunohost.org  
+It's a special core package, only made for our infra.**  
+But, don't hesitate to fork this repository to enhance this package and made it more generic.
 
 **Upgrade this package:**  
-`sudo yunohost app upgrade --verbose example -u https://github.com/YunoHost-Apps/example_ynh`
+`sudo yunohost app upgrade --verbose redmine -u https://github.com/YunoHost-Apps/redmine_ynh_core`
 
-**Multi-user:** Yes/No. How about the ldap and HTTP auth support.
+**Multi-user:** Ldap can be used, but it's not set.

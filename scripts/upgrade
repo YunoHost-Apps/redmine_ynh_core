@@ -78,6 +78,14 @@ ynh_replace_string "__DB_NAME__" "$db_name" "$final_path/config/database.yml"
 ynh_replace_string "__DB_PWD__" "$db_pwd" "$final_path/config/database.yml"
 
 #=================================================
+# SETUP PUMA, A RUBY SERVER
+#=================================================
+
+# Copy the configuration for puma
+ynh_replace_string "__FINALPATH__" "$final_path" "$final_path/config/puma.rb"
+ynh_replace_string "__APP__" "$app" "$final_path/config/puma.rb"
+
+#=================================================
 # SETUP LOGROTATE
 #=================================================
 
@@ -91,6 +99,8 @@ ynh_use_logrotate
 # Create a dedicated systemd config
 # ynh_systemd_config
 # Doesn't work with systemd... So I tried and success with sysvinit
+ynh_replace_string "__FINALPATH__" "$final_path" "../conf/sysvinit.init"
+ynh_replace_string "__APP__" "$app" "../conf/sysvinit.init"
 cp ../conf/sysvinit.init /etc/init.d/redmine
 chmod +x /etc/init.d/redmine
 update-rc.d redmine defaults
@@ -121,4 +131,4 @@ systemctl reload nginx
 #=================================================
 
 systemctl restart $app
-
+sleep 2
