@@ -46,17 +46,10 @@ ynh_backup "$final_path"
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
-# BACKUP THE PHP-FPM CONFIGURATION
+# BACKUP THE POSTGRES DATABASE
 #=================================================
 
-ynh_backup "/etc/php5/fpm/pool.d/$app.conf"
-ynh_backup "/etc/php5/fpm/conf.d/20-$app.ini"
-
-#=================================================
-# BACKUP THE MYSQL DATABASE
-#=================================================
-
-ynh_mysql_dump_db "$db_name" > db.sql
+sudo su -c "pg_dump $db_name" postgres > db.sql
 
 #=================================================
 # SPECIFIC BACKUP
@@ -67,13 +60,8 @@ ynh_mysql_dump_db "$db_name" > db.sql
 ynh_backup "/etc/logrotate.d/$app"
 
 #=================================================
-# BACKUP SYSTEMD
+# BACKUP SYSVINIT
 #=================================================
 
-ynh_backup "/etc/systemd/system/$app.service"
-
-#=================================================
-# BACKUP THE CRON FILE
-#=================================================
-
-ynh_backup "/etc/cron.d/$app"
+# ynh_backup "/etc/systemd/system/$app.service"
+ynh_backup "/etc/init.d/redmine"

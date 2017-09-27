@@ -56,33 +56,18 @@ ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
 ynh_restore_file "$final_path"
 
 #=================================================
-# RESTORE THE MYSQL DATABASE
-#=================================================
-
-db_pwd=$(ynh_app_setting_get $app mysqlpwd)
-ynh_mysql_setup_db $db_name $db_name $db_pwd
-ynh_mysql_connect_as $db_name $db_pwd $db_name < ./db.sql
-
-#=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
 
 # Create the dedicated user (if not existing)
-ynh_system_user_create $app
+ynh_system_user_create $app "$final_path"
 
 #=================================================
 # RESTORE USER RIGHTS
 #=================================================
 
 # Restore permissions on app files
-chown -R root: $final_path
-
-#=================================================
-# RESTORE THE PHP-FPM CONFIGURATION
-#=================================================
-
-ynh_restore_file "/etc/php5/fpm/pool.d/$app.conf"
-ynh_restore_file "/etc/php5/fpm/conf.d/20-$app.ini"
+chown -R $app: $final_path
 
 #=================================================
 # SPECIFIC RESTORATION
@@ -91,26 +76,49 @@ ynh_restore_file "/etc/php5/fpm/conf.d/20-$app.ini"
 #=================================================
 
 # Define and install dependencies
-ynh_install_app_dependencies deb1 deb2
+ynh_install_app_dependencies ruby-zip libssl-dev libyaml-dev libcurl4-openssl-dev ruby gem libapr1-dev libxslt1-dev checkinstall libxml2-dev ruby-dev vim libmagickwand-dev imagemagick postgresql postgresql-server-dev-all
+
+#=================================================
+# RESTORE THE POSTGRES DATABASE
+#=================================================
+
+db_pwd=$(ynh_app_setting_get $app psqlpwd)
+# Restore database
+ynh_psql_test_if_first_run
+ynh_psql_create_db $db_name $db_name $db_pwd
+
+su -c "psql $db_name" postgres < db.sql
+
+#=================================================
+# SETUP PUMA, A RUBY SERVER
+#=================================================
+
+# Install puma with gem
+(cd "$final_path"
+# Install bundler, a gems installer
+gem install bundler)
+# Add puma to the dependencies
+# exec_as $app echo "gem 'puma'" >> Gemfile.local
+# # Install without documentation. Why ...?
+# exec_as $app echo "gem: --no-ri --no-rdoc" >> "$final_path/.gemrc"
+# # Install dependencies
+# exec_as $app bundle install --path vendor/bundle --without development test postgresql)
+
+# Set permissions to app files
+# chown -R $app: $final_path
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app --log "/var/log/$app/APP.log"
+yunohost service add $app --log "/var/log/$app/puma.stderr.log"
 
 #=================================================
-# RESTORE SYSTEMD
+# RESTORE SYSVINIT
 #=================================================
 
-ynh_restore_file "/etc/systemd/system/$app.service"
-systemctl enable $app.service
-
-#=================================================
-# RESTORE THE CRON FILE
-#=================================================
-
-ynh_restore_file "/etc/cron.d/$app"
+ynh_restore_file "/etc/init.d/redmine"
+update-rc.d $app defaults
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION
@@ -121,8 +129,13 @@ ynh_restore_file "/etc/logrotate.d/$app"
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
-# RELOAD NGINX AND PHP-FPM
+# RELOAD NGINX
 #=================================================
 
-systemctl reload php5-fpm
 systemctl reload nginx
+
+#=================================================
+# START PUMA AND REDMINE
+#=================================================
+
+systemctl start $app

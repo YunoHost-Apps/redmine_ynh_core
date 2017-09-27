@@ -18,10 +18,13 @@ RAILS_ENV=production
 
 # RBENV_ROOT="/home/$APP_USER/.rbenv"
 # PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
-# SET_PATH="cd $APP_ROOT; rbenv rehash"
+SET_PATH="cd $APP_ROOT"
 DAEMON="bundle exec puma"
-DAEMON_ARGS="--config $APP_ROOT/config/puma.rb"
-CMD="$DAEMON $DAEMON_ARGS"
+# DAEMON_ARGS="-C $APP_ROOT/config/puma.rb -e $RAILS_ENV"
+DAEMON_ARGS="--config $APP_ROOT/config/puma.rb -e $RAILS_ENV"
+CMD="RAILS_ENV=\"$RAILS_ENV\" $DAEMON $DAEMON_ARGS"
+# CMD="$SET_PATH; RAILS_ENV=\"$RAILS_ENV\" $DAEMON $DAEMON_ARGS"
+# CMD="$DAEMON $DAEMON_ARGS"
 NAME=redmine
 DESC="Puma Redmine Service"
 PIDFILE="$APP_ROOT/tmp/pids/puma.pid"
@@ -36,7 +39,8 @@ sig () {
 case $1 in
   start)
         sig 0 && echo >&2 "Already running" && exit 0
-        sudo -u $APP_USER $CMD
+        sudo -u $APP_USER /bin/bash -c "$SET_PATH; $CMD"
+#         su - $APP_USER -c "$CMD"
         ;;
   stop)
         sig QUIT && exit 0
